@@ -19,13 +19,35 @@
             width: 100%; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px;
         }
         .line { width: 2px; height: 40px; background: #334155; }
+
+        .node-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Menjaga kotak dan garis tetap di tengah satu sama lain */
+        }
+
+        .line {
+            width: 2px;
+            height: 40px;
+            background: #334155;
+            /* Menghapus margin otomatis agar tidak lari ke samping */
+            margin: 0; 
+        }
+
+        .branch {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 0; /* Kita atur jarak lewat garis saja */
+        }
     </style>
 </head>
 <body>
     <div class="wrapper">
-        <h1>FLUXIOM : Engineer's Journey</h1>
-        
-        @foreach ($tasks as $task)
+    <h1>FLUXIOM : Engineer's Journey</h1>
+    
+    @foreach ($tasks as $task)
+        <div class="node-container">
             {{-- Level 1 --}}
             @include('partials.task_node', ['task' => $task])
 
@@ -33,7 +55,7 @@
                 <div class="line"></div>
                 <div class="branch">
                     @foreach ($task->children as $child)
-                        <div>
+                        <div class="node-container">
                             {{-- Level 2 --}}
                             @include('partials.task_node', ['task' => $child])
 
@@ -41,8 +63,10 @@
                                 <div class="line"></div>
                                 <div class="branch">
                                     @foreach ($child->children as $grandchild)
-                                        {{-- Level 3 --}}
-                                        @include('partials.task_node', ['task' => $grandchild])
+                                        <div class="node-container">
+                                            {{-- Level 3 --}}
+                                            @include('partials.task_node', ['task' => $grandchild])
+                                        </div>
                                     @endforeach
                                 </div>
                             @endif
@@ -50,7 +74,8 @@
                     @endforeach
                 </div>
             @endif
-        @endforeach
-    </div>
+        </div>
+    @endforeach
+</div>
 </body>
 </html>
