@@ -21,8 +21,8 @@
                 .line { width: 2px; height: 40px; background: #334155; margin: 0; }
             </style>
 
-            {{-- PERBAIKAN: Cek apakah kedua array kosong --}}
-            @if(count($activeTasks) == 0 && count($historyTasks) == 0)
+            {{-- Cek apakah user sama sekali belum punya task (aktif maupun tamat) --}}
+            @if(count($activeTasks) == 0 && !$isAllCompleted)
                 <div class="text-center mt-10">
                     <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-300 mb-4">Skill Tree Anda Masih Kosong</h3>
                     <p class="text-gray-600 dark:text-gray-500 mb-6">Upload silabus kuliah Anda dan biarkan AI menyusun peta kompetensinya!</p>
@@ -77,8 +77,9 @@
                         <p class="text-green-100 mb-6">Anda telah menamatkan seluruh kurikulum. AI telah menganalisis performa Anda.</p>
 
                         <div class="flex justify-center gap-4">
-                            <a href="#" class="bg-white text-green-700 font-bold py-3 px-8 rounded-full hover:bg-gray-100 transition shadow-lg">
-                                📄 Download PDF Summary & Sertifikat
+                            {{-- Tombol ini sekarang mengarah ke halaman History --}}
+                            <a href="{{ route('history') }}" class="bg-white text-green-700 font-bold py-3 px-8 rounded-full hover:bg-gray-100 transition shadow-lg">
+                                📂 Buka Arsip & Unduh Sertifikat
                             </a>
 
                             <a href="{{ route('tasks.autoCreate') }}" class="bg-gray-900 text-white border border-gray-500 font-bold py-3 px-8 rounded-full hover:bg-gray-800 transition">
@@ -95,19 +96,6 @@
                             @foreach ($activeTasks as $task)
                                 @include('partials.tree_branch', ['task' => $task])
                             @endforeach
-                        </div>
-                    </div>
-                @endif
-
-                @if(count($historyTasks) > 0)
-                    <div class="mt-20 pt-10 border-t border-gray-700 opacity-75 hover:opacity-100 transition">
-                        <h3 class="text-xl font-bold text-gray-400 text-center mb-6">📚 Archive / History</h3>
-                        <div class="tree-container w-full overflow-x-auto pb-10 scale-90 origin-top">
-                            <div style="display: flex; justify-content: center; align-items: flex-start; gap: 60px; padding: 0 40px;">
-                                @foreach ($historyTasks as $task)
-                                    @include('partials.tree_branch', ['task' => $task])
-                                @endforeach
-                            </div>
                         </div>
                     </div>
                 @endif

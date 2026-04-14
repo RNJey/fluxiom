@@ -5,45 +5,47 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Task;
 use Illuminate\Support\Facades\Http;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 
 class TaskController extends Controller
 {
+    // HALAMAN DASHBOARD (Hanya tampilkan yang BELUM tamat)
     public function index()
     {
         $userId = auth()->id();
-
-        // Ambil semua AKAR (parent_id = null)
-        $allRoots = Task::where('user_id', $userId)
-                        ->whereNull('parent_id')
-                        ->get();
+        $allRoots = Task::where('user_id', $userId)->whereNull('parent_id')->get();
 
         $activeTasks = [];
-        $historyTasks = [];
-
         foreach ($allRoots as $root) {
-            // Cek apakah di dalam cabang ini masih ada tugas yang belum 'completed'
-            $hasUnfinished = Task::where('user_id', $userId)
-                                 ->where(function($query) use ($root) {
-                                     $query->where('id', $root->id)
-                                           ->orWhere('parent_id', $root->id); // Logika sederhana untuk kedalaman 1-2 level
-                                 })
-                                 ->where('status', '!=', 'completed')
-                                 ->exists();
-
-            if ($hasUnfinished) {
-                $activeTasks[] = $root;
-            } else {
-                $historyTasks[] = $root;
+            // Gunakan fungsi dari Model tadi
+            if (!$root->isTreeCompleted()) {
+                $activeTasks[] = $root; 
             }
         }
 
-        // Cek apakah user sudah menyelesaikan semua tugas di database
+        // Cek apakah semua tugas di seluruh database sudah tamat (untuk banner)
         $totalTasks = Task::where('user_id', $userId)->count();
         $unfinishedTasks = Task::where('user_id', $userId)->where('status', '!=', 'completed')->count();
         $isAllCompleted = ($totalTasks > 0 && $unfinishedTasks === 0);
 
-        return view('dashboard', compact('activeTasks', 'historyTasks', 'isAllCompleted'));
+        return view('dashboard', compact('activeTasks', 'isAllCompleted'));
+    }
+
+    // HALAMAN HISTORY BARU (Hanya tampilkan yang SUDAH tamat total)
+    public function history()
+    {
+        $userId = auth()->id();
+        $allRoots = Task::where('user_id', $userId)->whereNull('parent_id')->get();
+
+        $historyTasks = [];
+        foreach ($allRoots as $root) {
+            if ($root->isTreeCompleted()) {
+                $historyTasks[] = $root;
+            }
+        }
+
+        return view('history', compact('historyTasks'));
     }
 
     public function complete(Request $request, $id)
@@ -186,4 +188,55 @@ class TaskController extends Controller
 
     return view('task_detail', compact('task'));
 }
+
+public function downloadPdf()
+    {
+        $user = auth()->user();
+        
+        // Ambil semua task yang sudah selesai untuk dianalisis
+        $completedTasks = Task::where('user_id', $user->id)->where('status', 'completed')->get();
+        
+        if ($completedTasks->isEmpty()) {
+            return back()->with('error', 'Anda belum menyelesaikan materi apapun.');
+        }
+
+        // Ambil daftar judul materinya saja untuk dibaca AI
+        $taskTitles = $completedTasks->pluck('title')->implode(', ');
+
+        // Tembak Gemini AI untuk membuat Fun Fact / Evaluasi
+        $apiKey = env('GEMINI_API_KEY');
+        $prompt = "Tugas: Buatkan paragraf evaluasi kelulusan (Fun Fact & Motivasi) yang inspiratif untuk seorang mahasiswa Teknik bernama {$user->name}. 
+        Dia baru saja menamatkan silabus dengan materi berikut: {$taskTitles}. 
+        Aturan:
+        1. Puji dia sebagai seorang '{$user->gelar}'.
+        2. Analisis secara singkat keahlian apa yang sekarang dia kuasai dari materi-materi tersebut.
+        3. Buat maksimal 3-4 kalimat saja.
+        4. Jangan gunakan markdown, cukup teks biasa yang profesional namun hangat.";
+
+        $aiSummary = "Laporan AI belum tersedia. Namun, Anda telah menunjukkan dedikasi luar biasa dalam menyelesaikan kurikulum ini.";
+
+        try {
+            $response = Http::withHeaders(['Content-Type' => 'application/json'])
+                ->withoutVerifying()
+                ->timeout(60)
+                ->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" . trim($apiKey), [
+                    'contents' => [['parts' => [['text' => $prompt]]]]
+                ]);
+
+            if ($response->successful()) {
+                $result = $response->json();
+                $aiSummary = $result['candidates'][0]['content']['parts'][0]['text'] ?? $aiSummary;
+            }
+        } catch (\Exception $e) {
+            // Jika AI gagal (misal timeout), PDF tetap tercetak dengan teks default
+        }
+
+        // Render tampilan PDF
+        $pdf = Pdf::loadView('certificate_pdf', compact('user', 'completedTasks', 'aiSummary'));
+        
+        // Atur ukuran kertas
+        $pdf->setPaper('A4', 'portrait');
+
+        return $pdf->download('Fluxiom_Certificate_' . str_replace(' ', '_', $user->name) . '.pdf');
+    }
 }

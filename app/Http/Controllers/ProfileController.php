@@ -32,6 +32,19 @@ class ProfileController extends Controller
             $request->user()->email_verified_at = null;
         }
 
+        // --- LOGIKA UPLOAD FOTO PROFIL MULAI DI SINI ---
+        if ($request->hasFile('profile_photo')) {
+            // Hapus foto lama jika ada
+            if ($request->user()->profile_photo) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($request->user()->profile_photo);
+            }
+            
+            // Simpan foto baru
+            $path = $request->file('profile_photo')->store('profile_photos', 'public');
+            $request->user()->profile_photo = $path;
+        }
+        // --- BATAS LOGIKA UPLOAD ---
+
         $request->user()->save();
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');

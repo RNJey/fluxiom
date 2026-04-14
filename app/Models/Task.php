@@ -29,4 +29,18 @@ class Task extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    // Fungsi untuk mengecek apakah pohon ini dan SEMUA turunannya sudah tamat
+    public function isTreeCompleted()
+    {
+        if ($this->status !== 'completed') {
+            return false;
+        }
+        foreach ($this->children as $child) {
+            if (!$child->isTreeCompleted()) {
+                return false; // Jika ada satu saja anak/cucu yang belum tamat, return false
+            }
+        }
+        return true;
+    }
 }
