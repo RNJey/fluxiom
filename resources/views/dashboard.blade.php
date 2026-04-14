@@ -21,38 +21,48 @@
                 .line { width: 2px; height: 40px; background: #334155; margin: 0; }
             </style>
 
-            <div class="tree-container">
-                @foreach ($tasks as $task)
-                    <div class="node-container">
-                        {{-- Level 1 --}}
-                        @include('partials.task_node', ['task' => $task, 'userStatuses' => $userStatuses])
+            @if($tasks->isEmpty())
+                <div class="text-center mt-10">
+                    <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-300 mb-4">Skill Tree Anda Masih Kosong</h3>
+                    <p class="text-gray-600 dark:text-gray-500 mb-6">Upload silabus kuliah Anda dan biarkan AI menyusun peta kompetensinya!</p>
+                    <a href="{{ route('tasks.autoCreate') }}" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-full shadow-[0_0_20px_rgba(79,70,229,0.5)] transition inline-block">
+                        🚀 Generate Skill Tree Baru
+                    </a>
+                </div>
+            @else
+                <div class="tree-container">
+                    @foreach ($tasks as $task)
+                        <div class="node-container">
+                            {{-- Level 1 --}}
+                            @include('partials.task_node', ['task' => $task])
 
-                        @if ($task->children->count() > 0)
-                            <div class="line"></div>
-                            <div class="branch">
-                                @foreach ($task->children as $child)
-                                    <div class="node-container">
-                                        {{-- Level 2 --}}
-                                        @include('partials.task_node', ['task' => $child, 'userStatuses' => $userStatuses])
+                            @if ($task->children->count() > 0)
+                                <div class="line"></div>
+                                <div class="branch">
+                                    @foreach ($task->children as $child)
+                                        <div class="node-container">
+                                            {{-- Level 2 --}}
+                                            @include('partials.task_node', ['task' => $child])
 
-                                        @if ($child->children->count() > 0)
-                                            <div class="line"></div>
-                                            <div class="branch">
-                                                @foreach ($child->children as $grandchild)
-                                                    <div class="node-container">
-                                                        {{-- Level 3 --}}
-                                                        @include('partials.task_node', ['task' => $grandchild, 'userStatuses' => $userStatuses])
-                                                    </div>
-                                                @endforeach
-                                            </div>
-                                        @endif
-                                    </div>
-                                @endforeach
-                            </div>
-                        @endif
-                    </div>
-                @endforeach
-            </div>
+                                            @if ($child->children->count() > 0)
+                                                <div class="line"></div>
+                                                <div class="branch">
+                                                    @foreach ($child->children as $grandchild)
+                                                        <div class="node-container">
+                                                            {{-- Level 3 --}}
+                                                            @include('partials.task_node', ['task' => $grandchild])
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            @endif
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+            @endif
 
         </div>
     </div>
