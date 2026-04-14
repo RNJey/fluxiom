@@ -16,7 +16,6 @@ return new class extends Migration
         $table->string('title');
         $table->text('description')->nullable();
         $table->integer('xp_reward')->default(50);
-        $table->enum('status', ['locked', 'available', 'completed'])->default('locked');
         $table->foreignId('parent_id')->nullable()->constrained('tasks')->onDelete('cascade');
         $table->timestamps();
     });

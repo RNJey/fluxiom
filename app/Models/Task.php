@@ -10,7 +10,13 @@ class Task extends Model
     use HasFactory;
 
     // Kolom apa saja yang boleh diisi
-    protected $fillable = ['title', 'description', 'xp_reward', 'status', 'parent_id'];
+    protected $fillable = ['title', 'description', 'xp_reward', 'parent_id'];
+
+    // Relasi ke User
+    public function users()
+    {
+        return $this->belongsToMany(User::class)->withPivot('status')->withTimestamps();
+    }
 
     // Relasi ke "Induk" (Syarat sebelum tugas ini terbuka)
     public function parent()
