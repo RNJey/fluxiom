@@ -9,18 +9,20 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void {
-    Schema::table('tasks', function (Blueprint $table) {
-        $table->longText('content')->nullable(); // Tempat naruh materi (bisa teks panjang)
-    });
-}
+    public function up(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            $table->integer('xp')->default(0);      // XP awal 0
+            $table->integer('level')->default(1);   // Level awal 1
+        });
+    }
 
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::table('tasks', function (Blueprint $table) {
+        Schema::table('users', function (Blueprint $table) {
             //
         });
     }

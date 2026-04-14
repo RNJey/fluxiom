@@ -30,6 +30,26 @@ class User extends Authenticatable
         ];
     }
 
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+        'xp',   
+        'level',
+    ];
+
+    // Sistem Gelar Otomatis berdasarkan Level
+    public function getGelarAttribute()
+    {
+        $level = $this->level ?? 1;
+        
+        if ($level < 5) return 'Novice Trainee';
+        if ($level < 10) return 'Junior Engineer';
+        if ($level < 20) return 'Mid-Level Developer';
+        if ($level < 35) return 'Senior Tech Lead';
+        return 'System Architect';
+    }
+
     // Relasi ke progress tugas user
     public function tasks()
     {

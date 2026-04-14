@@ -6,8 +6,19 @@ use Illuminate\Database\Eloquent\Model;
 
 class Task extends Model
 {
-    // Tambahkan user_id dan status
-    protected $fillable = ['user_id', 'title', 'description', 'xp_reward', 'status', 'parent_id'];
+    // Tambahkan 'content' ke dalam array ini!
+    protected $fillable = [
+        'user_id', 
+        'title', 
+        'description', 
+        'content',
+        'quiz_question', 
+        'quiz_options', 
+        'quiz_answer',
+        'xp_reward', 
+        'status', 
+        'parent_id'
+    ];
 
     public function children()
     {
