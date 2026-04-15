@@ -32,7 +32,7 @@
                 </div>
             @else
 
-                <div class="bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-700 mb-8 max-w-4xl mx-auto">
+                <div class="bg-slate-800/50 backdrop-blur-xl p-6 rounded-3xl shadow-lg border border-slate-700/50 mb-8 max-w-4xl mx-auto transition-all">
                     
                     @if(session('level_up'))
                         <div class="mb-4 bg-yellow-500/20 border border-yellow-500 text-yellow-300 px-4 py-3 rounded text-center font-bold animate-pulse shadow-[0_0_15px_rgba(234,179,8,0.5)]">
@@ -45,19 +45,24 @@
                         </div>
                     @endif
 
-                    <div class="flex items-center justify-between mb-2">
-                        <div class="flex items-center space-x-4">
-                            <div class="bg-indigo-600 rounded-full h-16 w-16 flex items-center justify-center border-4 border-indigo-400 shadow-[0_0_15px_rgba(79,70,229,0.5)]">
-                                <span class="text-2xl font-bold text-white">{{ auth()->user()->level }}</span>
+                    <div class="flex flex-col md:flex-row items-center justify-between gap-6 mb-4 text-center md:text-left">
+                        
+                        <div class="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4">
+                            <div class="bg-blue-600/20 rounded-full h-20 w-20 flex items-center justify-center border-4 border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.5)] relative">
+                                <div class="absolute inset-0 bg-blue-500 rounded-full blur-md opacity-40"></div>
+                                <span class="text-3xl font-black text-white relative z-10">{{ auth()->user()->level }}</span>
                             </div>
                             <div>
                                 <h2 class="text-2xl font-bold text-white">{{ auth()->user()->name }}</h2>
-                                <p class="text-indigo-400 font-bold uppercase tracking-widest text-sm">{{ auth()->user()->gelar }}</p>
+                                <p class="text-blue-400 font-bold uppercase tracking-widest text-sm bg-blue-900/30 px-3 py-1 rounded-full inline-block mt-2 border border-blue-500/30">
+                                    {{ auth()->user()->gelar }}
+                                </p>
                             </div>
                         </div>
-                        <div class="text-right">
-                            <span class="text-2xl font-bold text-yellow-400">{{ auth()->user()->xp }} XP</span>
-                            <p class="text-gray-400 text-sm">Next Level: {{ auth()->user()->level * 500 }} XP</p>
+
+                        <div class="bg-slate-900/50 px-6 py-3 rounded-2xl border border-slate-700 w-full md:w-auto">
+                            <div class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-amber-600">{{ auth()->user()->xp }} XP</div>
+                            <p class="text-slate-400 text-sm font-medium mt-1">Next: {{ auth()->user()->level * 500 }} XP</p>
                         </div>
                     </div>
 
@@ -66,8 +71,10 @@
                         $progressPercentage = ($currentLevelXp / 500) * 100;
                     @endphp
                     
-                    <div class="w-full bg-gray-900 rounded-full h-4 mt-4 border border-gray-700">
-                        <div class="bg-gradient-to-r from-blue-500 to-indigo-500 h-full rounded-full transition-all duration-1000 shadow-[0_0_10px_rgba(59,130,246,0.8)]" style="width: {{ $progressPercentage }}%"></div>
+                    <div class="w-full bg-slate-900 rounded-full h-3 mt-2 border border-slate-700 overflow-hidden relative">
+                        <div class="bg-gradient-to-r from-blue-500 to-indigo-500 h-full rounded-full transition-all duration-1000 shadow-[0_0_10px_rgba(59,130,246,0.8)] relative" style="width: {{ $progressPercentage }}%">
+                            <div class="absolute top-0 right-0 bottom-0 w-10 bg-gradient-to-r from-transparent to-white opacity-30"></div>
+                        </div>
                     </div>
                 </div>
 
